@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PINKY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pink-1:#fff0f6; --pink-2:#ffd6e8; --pink-3:#ff9ec7; --pink-4:#ff5fa8; --pink-5:#e63f8f;
+  --purple-1:#f2ecff; --purple-2:#d9c8ff; --purple-3:#b18aff; --purple-4:#8b5cf6; --purple-5:#6d28d9;
+  --ink:#3a2340; --ink-soft:#7a5f82; --white:#fffdfe; --gold:#f6c453; --card:#ffffff;
+  --bg: linear-gradient(160deg,var(--pink-1) 0%,var(--purple-1) 100%);
+  --radius:22px; --shadow: 0 10px 30px rgba(180,80,150,.15);
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root[data-theme="lavender"]{ --pink-1:#f4f0ff; --pink-2:#e3d6ff; --pink-4:#8b5cf6; --pink-5:#6d28d9; --bg:linear-gradient(160deg,#f4f0ff,#ffeaf5);}
+:root[data-theme="pastel"]{ --bg:linear-gradient(160deg,#fff7f0,#f0f7ff);}
+:root[data-theme="night"]{ --ink:#f5e9f7; --ink-soft:#cbb3d6; --white:#2a1830; --card:#341c3d; --bg:linear-gradient(160deg,#1e1024,#2d1338); --pink-1:#3a2043;}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;font-family:'Quicksand',sans-serif;background:var(--bg);color:var(--ink);min-height:100%;}
+h1,h2,h3,.display{font-family:'Fredoka',sans-serif;}
+button{font-family:inherit;cursor:pointer;}
+#app{max-width:520px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:90px;}
+.topbar{padding:22px 20px 8px;}
+.greet{font-size:1.5rem;font-weight:600;margin:0;}
+.sub{color:var(--ink-soft);font-size:.9rem;margin-top:2px;}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin:12px 20px;}
+.progress-ring-wrap{display:flex;align-items:center;gap:16px;}
+.taskcard{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;padding:14px;margin:10px 20px;box-shadow:0 4px 16px rgba(180,80,150,.10);transition:transform .15s;}
+.taskcard.done{opacity:.55;}
+.check{width:26px;height:26px;border-radius:50%;border:2px solid var(--pink-4);flex:none;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--pink-4);background:none;}
+.check.on{background:var(--pink-4);color:#fff;}
+.task-name{font-weight:600;font-size:.98rem;}
+.task-meta{font-size:.78rem;color:var(--ink-soft);margin-top:2px;}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600;background:var(--pink-2);color:var(--pink-5);margin-right:6px;}
+.pri-high{color:#e0447a;} .pri-med{color:#e0a83f;} .pri-low{color:#4caf7d;}
+.fab{position:fixed;right:24px;bottom:100px;background:linear-gradient(135deg,var(--pink-4),var(--purple-4));color:#fff;border:none;width:58px;height:58px;border-radius:50%;font-size:26px;box-shadow:0 8px 22px rgba(200,80,180,.4);z-index:40;}
+.navbar{position:fixed;bottom:0;left:0;right:0;background:var(--card);display:flex;justify-content:space-around;padding:10px 6px calc(10px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 20px rgba(150,80,140,.12);max-width:520px;margin:0 auto;z-index:30;}
+.navbtn{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:1.2rem;color:var(--ink-soft);}
+.navbtn.active{color:var(--pink-5);}
+.navbtn span{font-size:.62rem;font-weight:600;}
+.section-title{font-weight:700;font-size:1.05rem;margin:18px 20px 6px;}
+.modal-bg{position:fixed;inset:0;background:rgba(60,20,50,.35);display:flex;align-items:flex-end;z-index:100;backdrop-filter:blur(2px);}
+.modal{background:var(--card);width:100%;max-width:520px;margin:0 auto;border-radius:28px 28px 0 0;padding:22px 20px 34px;max-height:88vh;overflow-y:auto;}
+.field label{font-size:.78rem;font-weight:700;color:var(--ink-soft);display:block;margin:14px 0 5px;}
+.field input, .field select, .field textarea{width:100%;padding:11px 13px;border-radius:14px;border:1.5px solid var(--pink-2);background:var(--pink-1);color:var(--ink);font-family:inherit;font-size:.9rem;}
+:root[data-theme="night"] .field input, :root[data-theme="night"] .field select, :root[data-theme="night"] .field textarea{background:#241429;border-color:#4a2c55;color:var(--ink);}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:7px 14px;border-radius:20px;border:1.5px solid var(--pink-2);background:var(--pink-1);font-size:.8rem;font-weight:600;color:var(--ink-soft);}
+.chip.sel{background:var(--pink-4);color:#fff;border-color:var(--pink-4);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--pink-4),var(--purple-4));color:#fff;border:none;padding:14px;border-radius:16px;font-weight:700;font-size:1rem;margin-top:20px;}
+.btn-ghost{background:none;border:none;color:var(--ink-soft);font-weight:600;}
+.overlay-celeb{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.reward-card{background:linear-gradient(160deg,var(--purple-3),var(--pink-4));color:#fff;border-radius:26px;padding:34px 26px;text-align:center;box-shadow:0 20px 60px rgba(100,20,90,.4);pointer-events:auto;animation:pop .4s ease;min-width:250px;}
+@keyframes pop{0%{transform:scale(.6);opacity:0;}70%{transform:scale(1.06);}100%{transform:scale(1);opacity:1;}}
+.emoji-burst span{position:absolute;font-size:22px;animation:fly 1.1s ease-out forwards;}
+@keyframes fly{to{transform:translateY(-160px) translateX(var(--dx)) rotate(360deg);opacity:0;}}
+.xp-bar-bg{background:var(--pink-1);border-radius:20px;height:14px;overflow:hidden;}
+.xp-bar-fill{background:linear-gradient(90deg,var(--pink-4),var(--purple-4));height:100%;border-radius:20px;transition:width .6s ease;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.char-card{background:var(--card);border-radius:20px;padding:14px;text-align:center;box-shadow:0 6px 18px rgba(150,80,140,.12);}
+.char-card .badge-svg{max-width:64px;}
+.char-role{font-size:.68rem;color:var(--ink-soft);font-weight:600;margin-top:2px;}
+.char-nick{width:100%;margin-top:8px;padding:7px 8px;border-radius:12px;border:1.5px solid var(--pink-2);background:var(--pink-1);font-size:.8rem;text-align:center;font-family:inherit;}
+.char-locked{opacity:.4;filter:grayscale(1);}
+.collectible.locked{opacity:.4;filter:grayscale(1);}
+.badge-svg{width:100%;max-width:76px;display:block;margin:0 auto;}
+.rarity-label{font-size:.62rem;font-weight:700;color:var(--ink-soft);margin-top:4px;display:block;line-height:1.2;}
+.empty{text-align:center;color:var(--ink-soft);padding:40px 20px;font-size:.9rem;}
+.toast{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:20px;font-size:.85rem;z-index:300;box-shadow:0 6px 20px rgba(0,0,0,.25);}
+.reduce-motion *{animation:none!important;transition:none!important;}
+.cal-head{display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-top:6px;}
+.cal-head button{background:var(--card);border:none;width:34px;height:34px;border-radius:50%;font-size:1rem;box-shadow:0 2px 8px rgba(150,80,140,.15);color:var(--pink-5);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;padding:10px 20px;}
+.cal-dow{text-align:center;font-size:.68rem;font-weight:700;color:var(--ink-soft);}
+.cal-day{aspect-ratio:1;border-radius:12px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;position:relative;border:2px solid transparent;}
+.cal-day.other{opacity:.3;}
+.cal-day.today{border-color:var(--pink-4);}
+.cal-day.sel{background:linear-gradient(135deg,var(--pink-4),var(--purple-4));color:#fff;}
+.cal-dots{display:flex;gap:2px;margin-top:2px;}
+.cal-dots span{width:5px;height:5px;border-radius:50%;display:inline-block;}
+.cal-view-toggle{display:flex;gap:8px;padding:0 20px;margin-top:10px;}
+.switch{width:42px;height:24px;border-radius:20px;background:var(--pink-2);position:relative;border:none;}
+.switch.on{background:var(--pink-4);}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;}
+.switch.on::after{left:21px;}
+::-webkit-scrollbar{width:0;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modalRoot"></div>
+<div id="celebRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+/* ---------- Data & persistence ---------- */
+const CATS = {
+  personal:{label:'Personal',icon:'💗',color:'#ff5fa8'},
+  projects:{label:'Personal Projects',icon:'🎀',color:'#e63f8f'},
+  module:{label:'Module',icon:'🌸',color:'#c76bd6'},
+  sat:{label:'SAT',icon:'📚',color:'#8b5cf6'},
+  ap:{label:'AP',icon:'🧠',color:'#6d28d9'},
+  unis:{label:'Unis',icon:'🎓',color:'#b18aff'},
+  general:{label:'General',icon:'✨',color:'#f6c453'},
+};
+const COLLECTIBLES = [
+  {id:'p_heart',name:'Purple Heart',emoji:'💜',rarity:'common',cat:'hearts'},
+  {id:'pk_heart',name:'Pink Heart',emoji:'💗',rarity:'common',cat:'hearts'},
+  {id:'star',name:'Star',emoji:'⭐',rarity:'uncommon',cat:'stars'},
+  {id:'ribbon',name:'Ribbon',emoji:'🎀',rarity:'common',cat:'stickers'},
+  {id:'moon',name:'Moon',emoji:'🌙',rarity:'epic',cat:'moons'},
+  {id:'mic',name:'Microphone',emoji:'🎤',rarity:'uncommon',cat:'music'},
+  {id:'sparkle',name:'Sparkle',emoji:'✨',rarity:'common',cat:'stickers'},
+  {id:'gem',name:'Gem',emoji:'💎',rarity:'rare',cat:'special'},
+  {id:'flower',name:'Flower',emoji:'🌸',rarity:'common',cat:'flowers'},
+  {id:'wand',name:'Magic Wand',emoji:'🪄',rarity:'rare',cat:'special'},
+  {id:'crown',name:'Legendary Crown',emoji:'👑',rarity:'legendary',cat:'special'},
+];
+const CHARACTERS = [
+  {id:'c1',name:'Lyra',role:'Main Vocalist',emoji:'🎤'},
+  {id:'c2',name:'Bloom',role:'Dance Line',emoji:'🎀'},
+  {id:'c3',name:'Nova',role:'Leader',emoji:'⭐'},
+  {id:'c4',name:'Iris',role:'Visual',emoji:'🌸'},
+  {id:'c5',name:'Pixel',role:'Rapper',emoji:'✨'},
+  {id:'c6',name:'Echo',role:'Producer',emoji:'💎'},
+  {id:'c7',name:'Luna',role:'Maknae',emoji:'🌙'},
+];
+// Titles only (no lyrics, no audio, no cover art) — just track names for a discography checklist.
+const SONGS = [
+  'Dynamite','Butter','Permission to Dance','Boy With Luv','Fake Love','DNA','IDOL',
+  'ON','Black Swan','Spring Day','Life Goes On','Yet to Come','Mic Drop','Save Me','Blood Sweat & Tears'
+];
+const RARITY_ORDER=['common','uncommon','rare','epic','legendary'];
+const RARITY_LABEL={common:'💗 Common',uncommon:'💜 Uncommon',rare:'⭐ Rare',epic:'🌙 Epic',legendary:'👑 Legendary'};
+const MSGS=['YAYYYYY! 💗','TASK CLEARED! 🎀','ONE MORE DOWN ✨','YOU DID ITTTT 🌸','LOOK AT YOU GOINGGG 💜'];
+
+/* ---------- Original badge artwork (SVG templates, rarity-coded) ---------- */
+const RARITY_PALETTE = {
+  common:{a:'#ffd3e8',b:'#ff8fc0',ring:'#ff5fa8'},
+  uncommon:{a:'#e7d8ff',b:'#b18aff',ring:'#8b5cf6'},
+  rare:{a:'#c9d6ff',b:'#8aa0ff',ring:'#5b6ee6'},
+  epic:{a:'#c9a6ff',b:'#6d28d9',ring:'#4c1d95'},
+  legendary:{a:'#ffe9a8',b:'#f6c453',ring:'#c98a1a'},
+};
+let BADGE_COUNTER=0;
+function badgeSVG(item, locked){
+  const pal = RARITY_PALETTE[item.rarity] || RARITY_PALETTE.common;
+  const gid = 'bg'+(BADGE_COUNTER++);
+  const rayed = item.rarity==='epic' || item.rarity==='legendary';
+  let rays='';
+  if(rayed && !locked){
+    for(let i=0;i<8;i++){
+      const ang=i*45*Math.PI/180;
+      rays += `<line x1="50" y1="50" x2="${(50+48*Math.cos(ang)).toFixed(1)}" y2="${(50+48*Math.sin(ang)).toFixed(1)}" stroke="${pal.a}" stroke-width="2" opacity="0.35"/>`;
+    }
+  }
+  const crown = (item.rarity==='legendary' && !locked) ? `<text x="50" y="16" font-size="13" text-anchor="middle">👑</text>` : '';
+  const sparkle = (item.rarity!=='common' && !locked) ? `<text x="76" y="28" font-size="11">✨</text>` : '';
+  const glyph = locked ? '❔' : item.emoji;
+  const tag = locked ? '?' : item.rarity[0].toUpperCase();
+  return `<svg viewBox="0 0 100 116" class="badge-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs><radialGradient id="${gid}" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="${pal.a}"/><stop offset="100%" stop-color="${pal.b}"/>
+    </radialGradient></defs>
+    ${rays}
+    <circle cx="50" cy="50" r="43" fill="url(#${gid})" stroke="${pal.ring}" stroke-width="3" opacity="${locked?0.55:1}"/>
+    <circle cx="50" cy="50" r="43" fill="none" stroke="#ffffff" stroke-width="1.4" opacity="0.5"/>
+    ${crown}
+    <text x="50" y="60" font-size="32" text-anchor="middle">${glyph}</text>
+    ${sparkle}
+    <path d="M33 89 L50 81 L67 89 L63 111 L50 103 L37 111 Z" fill="${pal.ring}" opacity="${locked?0.3:0.9}"/>
+    <text x="50" y="99" font-size="9" text-anchor="middle" fill="#fff" font-family="Fredoka, sans-serif" font-weight="700">${tag}</text>
+  </svg>`;
+}
+
+const DEFAULT_STATE = {
+  tasks: [], xp:0, level:1, collection:[], characters:[], songs:[],
+  streak:{current:0,longest:0,lastCompleteDate:null},
+  categoryStreak:{},
+  dailyGoal:5,
+  characterNicknames:{},
+  settings:{theme:'pink', reduceMotion:false, sound:true, notifications:true},
+  history:{}, // date -> {completed,created,xp}
+  lastPerfectDay:null,
+};
+function load(){
+  try{ const raw=localStorage.getItem('pinky_state'); if(raw) return {...DEFAULT_STATE,...JSON.parse(raw)}; }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_STATE));
+}
+let STATE = load();
+function save(){ localStorage.setItem('pinky_state', JSON.stringify(STATE)); }
+function uid(){ return 't'+Math.random().toString(36).slice(2,10); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+/* ---------- Notifications ---------- */
+function askNotifPermission(){
+  if('Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+}
+function fireNotification(title,body){
+  if(!STATE.settings.notifications) return;
+  if('Notification' in window && Notification.permission==='granted'){
+    try{ new Notification(title,{body, icon:undefined}); }catch(e){}
+  } else {
+    showToast(title+' — '+body);
+  }
+}
+// Reminder checker loop (checks tasks whose reminderTime is due, in-memory, in-app only)
+setInterval(()=>{
+  const now = Date.now();
+  STATE.tasks.forEach(t=>{
+    if(t.completed || !t.reminderAt || t._notified) return;
+    if(now >= new Date(t.reminderAt).getTime()){
+      fireNotification('🎀 REMINDER', `Your "${t.name}" task is waiting for you 💗`);
+      t._notified = true; t._snoozeCount=0;
+      save();
+      if(document.getElementById('reminderBanner')) render();
+    }
+  });
+  // gentle re-reminders every 20 min if still incomplete & notified
+  STATE.tasks.forEach(t=>{
+    if(t.completed || !t._notified) return;
+    t._nextNudge = t._nextNudge || (Date.now()+20*60*1000);
+    if(Date.now() >= t._nextNudge){
+      const nudges=['Heyyy! Your task is waiting 🎀','Still want to knock this one out? 💗','Ready when you are ✨'];
+      fireNotification('PINKY', nudges[Math.floor(Math.random()*nudges.length)]+` (${t.name})`);
+      t._nextNudge = Date.now()+20*60*1000;
+    }
+  });
+},60*1000);
+
+/* ---------- Reward logic ---------- */
+function pickRarity(boost){
+  const r=Math.random();
+  if(boost){ if(r<0.35) return 'legendary'; if(r<0.6) return 'epic'; if(r<0.8) return 'rare'; return 'uncommon'; }
+  if(r<0.55) return 'common'; if(r<0.78) return 'uncommon'; if(r<0.92) return 'rare'; if(r<0.985) return 'epic'; return 'legendary';
+}
+function rollCollectible(boost){
+  const rarity = pickRarity(boost);
+  const pool = COLLECTIBLES.filter(c=>c.rarity===rarity);
+  return pool[Math.floor(Math.random()*pool.length)] || COLLECTIBLES[0];
+}
+function xpForNextLevel(level){ return 500 + (level-1)*250; }
+function addXP(amount){
+  STATE.xp += amount;
+  let needed = xpForNextLevel(STATE.level);
+  let leveled=false;
+  while(STATE.xp >= needed){ STATE.xp -= needed; STATE.level++; needed = xpForNextLevel(STATE.level); leveled=true; }
+  return leveled;
+}
+
+/* ---------- Completion flow ---------- */
+function completeTask(id){
+  const t = STATE.tasks.find(x=>x.id===id);
+  if(!t || t.completed) return;
+  t.completed = true; t.completedAt = new Date().toISOString();
+  const xpMap={easy:5,medium:10,hard:20};
+  let xp = xpMap[t.difficulty||'medium'];
+  const big = t.priority==='high';
+  if(big) xp += 15;
+  const leveled = addXP(xp);
+
+  // streak
+  const d = todayStr();
+  if(STATE.streak.lastCompleteDate !== d){
+    const yest = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    STATE.streak.current = (STATE.streak.lastCompleteDate===yest) ? STATE.streak.current+1 : 1;
+    STATE.streak.longest = Math.max(STATE.streak.longest, STATE.streak.current);
+    STATE.streak.lastCompleteDate = d;
+  }
+  STATE.categoryStreak[t.category] = (STATE.categoryStreak[t.category]||0)+1;
+
+  // history
+  STATE.history[d] = STATE.history[d] || {completed:0,created:0,xp:0};
+  STATE.history[d].completed++; STATE.history[d].xp += xp;
+
+  // reward roll
+  const purpleBox = Math.random() < 0.28 || big;
+  const item = rollCollectible(big);
+  STATE.collection.push({...item, gotAt:Date.now()});
+  let charUnlock=null;
+  if(Math.random()<0.12){ charUnlock = CHARACTERS[Math.floor(Math.random()*CHARACTERS.length)]; if(!STATE.characters.find(c=>c.id===charUnlock.id)) STATE.characters.push(charUnlock); else charUnlock=null; }
+
+  // streak milestone rewards
+  let streakReward=null;
+  const milestones={3:'star',7:'p_heart',14:'moon',30:'crown'};
+  if(milestones[STATE.streak.current]){
+    const c = COLLECTIBLES.find(x=>x.id===milestones[STATE.streak.current]);
+    STATE.collection.push({...c, gotAt:Date.now()}); streakReward=c;
+  }
+
+  save();
+
+  // perfect day check
+  const allToday = STATE.tasks.filter(x=>taskDate(x)===d);
+  const perfect = allToday.length>0 && allToday.every(x=>x.completed) && STATE.lastPerfectDay!==d;
+  if(perfect){ STATE.lastPerfectDay=d; const bonus=rollCollectible(true); STATE.collection.push({...bonus,gotAt:Date.now()}); save(); }
+
+  showCelebration({xp,big,purpleBox,item,charUnlock,streakReward,leveled,perfect});
+  render();
+}
+
+function taskDate(t){ return t.date || null; }
+
+/* ---------- Celebration UI ---------- */
+function burstEmojis(container){
+  const emos=['✨','💗','⭐','🎀','💜'];
+  for(let i=0;i<16;i++){
+    const s=document.createElement('span');
+    s.textContent=emos[Math.floor(Math.random()*emos.length)];
+    s.style.left=(45+Math.random()*10)+'%'; s.style.top='60%';
+    s.style.setProperty('--dx',(Math.random()*200-100)+'px');
+    s.style.animationDelay=(Math.random()*.3)+'s';
+    container.appendChild(s);
+  }
+}
+function showCelebration(info){
+  const root=document.getElementById('celebRoot');
+  const msg = MSGS[Math.floor(Math.random()*MSGS.length)];
+  const wrap=document.createElement('div');
+  wrap.className='overlay-celeb';
+  const burst=document.createElement('div'); burst.className='emoji-burst'; burst.style.position='absolute'; burst.style.inset='0';
+  wrap.appendChild(burst);
+  if(!STATE.settings.reduceMotion) burstEmojis(burst);
+  const stages=[];
+  stages.push(`<div class="reward-card"><h2 style="margin:0 0 6px;font-size:1.3rem;">${info.perfect? '🎉 TODAY = CLEARED! 🎉':'🎉 TASK COMPLETE!'}</h2>
+    <div style="font-size:1.1rem;font-weight:700;margin-bottom:6px;">${msg}</div>
+    <div style="font-size:1rem;">+${info.xp} XP ${info.leveled? ' • ⭐ LEVEL UP!':''}</div></div>`);
+  wrap.innerHTML = stages[0];
+  wrap.appendChild(burst);
+  root.innerHTML=''; root.appendChild(wrap);
+  const dur = STATE.settings.reduceMotion? 900: 1500;
+  setTimeout(()=>{
+    // reward reveal
+    const rc = document.createElement('div'); rc.className='overlay-celeb';
+    const label = info.purpleBox? '🎁 YOU GOT A PURPLE BOX!' : '🎁 SURPRISE REWARD!';
+    rc.innerHTML = `<div class="reward-card">
+      <div style="font-size:.85rem;opacity:.85;margin-bottom:8px;">${label}</div>
+      <div style="width:100px;margin:0 auto;">${badgeSVG(info.item,false)}</div>
+      <div style="font-weight:700;margin-top:6px;">${info.item.name.toUpperCase()}</div>
+      <div style="font-size:.75rem;margin-top:4px;">${RARITY_LABEL[info.item.rarity]}</div>
+      ${info.charUnlock? `<div style="margin-top:10px;font-size:.85rem;">🎭 New character unlocked: ${info.charUnlock.emoji} ${info.charUnlock.name}</div>`:''}
+      ${info.streakReward? `<div style="margin-top:10px;font-size:.85rem;">🔥 Streak reward: ${info.streakReward.emoji} ${info.streakReward.name}</div>`:''}
+    </div>`;
+    root.innerHTML=''; root.appendChild(rc);
+    setTimeout(()=>{ root.innerHTML=''; }, dur+400);
+  }, dur);
+}
+function showToast(msg){
+  const root=document.getElementById('toastRoot');
+  const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
+  root.appendChild(el);
+  setTimeout(()=>el.remove(),3200);
+}
+
+/* ---------- Router / render ---------- */
+let VIEW='home';
+let FILTER='all';
+let SEARCH='';
+
+function greeting(){
+  const h=new Date().getHours();
+  if(h<12) return ['GOOD MORNING, SANVI','💗'];
+  if(h<18) return ['GOOD AFTERNOON, SANVI','🌸'];
+  return ['GOOD EVENING, SANVI','💜'];
+}
+
+function renderHome(){
+  const [g,emoji]=greeting();
+  const today = STATE.tasks.filter(t=>taskDate(t)===todayStr());
+  const done = today.filter(t=>t.completed).length;
+  const pct = today.length? Math.round(done/today.length*100):0;
+  const needAttn = STATE.tasks.filter(t=>!t.completed && t.date && t.date<todayStr());
+  let html = `<div class="topbar"><h1 class="greet">${g} ${emoji}</h1><div class="sub">Level ${STATE.level} • ${STATE.streak.current}🔥 day streak</div></div>`;
+  html += `<div class="card"><div class="section-title" style="margin:0 0 10px;padding:0;">TODAY'S PROGRESS</div>
+    <div class="progress-ring-wrap">
+      <div style="font-size:2.2rem;font-weight:700;">${done} / ${today.length}</div>
+      <div style="flex:1;"><div class="xp-bar-bg"><div class="xp-bar-fill" style="width:${pct}%"></div></div><div class="sub" style="margin-top:4px;">${pct}% COMPLETE ✨</div></div>
+    </div></div>`;
+  if(needAttn.length){
+    html += `<div class="section-title">💗 NEEDS ATTENTION</div>`;
+    needAttn.forEach(t=>html+=taskCardHtml(t,true));
+  }
+  html += `<div class="section-title">TODAY'S TASKS</div>`;
+  if(today.length===0) html += `<div class="empty">No tasks for today yet. Tap + to add one 🎀</div>`;
+  today.sort((a,b)=>(a.completed-b.completed)|| (a.time||'').localeCompare(b.time||'')).forEach(t=>html+=taskCardHtml(t));
+  const upcoming = STATE.tasks.filter(t=>!t.completed && t.date>todayStr()).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4);
+  if(upcoming.length){ html+=`<div class="section-title">🎀 UPCOMING</div>`; upcoming.forEach(t=>html+=taskCardHtml(t)); }
+  return html;
+}
+
+function taskCardHtml(t,overdue){
+  const cat = CATS[t.category]||CATS.general;
+  const pri = t.priority==='high'?'🔴':t.priority==='low'?'🟢':'🟡';
+  return `<div class="taskcard ${t.completed?'done':''}">
+    <button class="check ${t.completed?'on':''}" onclick="completeTask('${t.id}')" ${t.completed?'disabled':''}>${t.completed?'✓':''}</button>
+    <div style="flex:1;" onclick="openTask('${t.id}')">
+      <div class="task-name">${cat.icon} ${escapeHtml(t.name)}</div>
+      <div class="task-meta"><span class="pill">${cat.label}</span>${t.date||''} ${t.time||''} ${pri} ${t.durationMin? '⏱ '+t.durationMin+'m':''} ${t.reminderAt? '🔔':''} ${overdue?' • overdue':''}</div>
+    </div>
+  </div>`;
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function renderTasks(){
+  let html = `<div class="topbar"><h1 class="greet">My Tasks 📋</h1></div>`;
+  html += `<div style="padding:0 20px;"><input placeholder="Search tasks..." oninput="SEARCH=this.value;render()" value="${escapeHtml(SEARCH)}" style="width:100%;padding:12px 14px;border-radius:16px;border:1.5px solid var(--pink-2);background:var(--card);font-family:inherit;"></div>`;
+  const filters=['all','today','upcoming','overdue','completed','high','personal','projects','module','sat','ap','unis','general'];
+  html += `<div class="chiprow" style="padding:12px 20px;">`+filters.map(f=>`<button class="chip ${FILTER===f?'sel':''}" onclick="FILTER='${f}';render()">${f}</button>`).join('')+`</div>`;
+  let list = STATE.tasks.slice();
+  const d=todayStr();
+  if(FILTER==='today') list=list.filter(t=>t.date===d);
+  else if(FILTER==='upcoming') list=list.filter(t=>!t.completed && t.date>d);
+  else if(FILTER==='overdue') list=list.filter(t=>!t.completed && t.date && t.date<d);
+  else if(FILTER==='completed') list=list.filter(t=>t.completed);
+  else if(FILTER==='high') list=list.filter(t=>t.priority==='high');
+  else if(CATS[FILTER]) list=list.filter(t=>t.category===FILTER);
+  if(SEARCH) list=list.filter(t=>(t.name+t.notes+(t.tags||'')).toLowerCase().includes(SEARCH.toLowerCase()));
+  list.sort((a,b)=>(a.completed-b.completed)||(a.date||'').localeCompare(b.date||''));
+  if(list.length===0) html+=`<div class="empty">No tasks here. Add one with the 🎀 button!</div>`;
+  list.forEach(t=>html+=taskCardHtml(t));
+  return html;
+}
+
+let CAL_DATE = new Date();
+let CAL_SELECTED = todayStr();
+let CAL_VIEW = 'month';
+function renderCalendar(){
+  let html = `<div class="topbar"><h1 class="greet">Calendar 📅</h1></div>`;
+  html += `<div class="cal-view-toggle">
+    <button class="chip ${CAL_VIEW==='month'?'sel':''}" onclick="CAL_VIEW='month';render()">Month</button>
+    <button class="chip ${CAL_VIEW==='week'?'sel':''}" onclick="CAL_VIEW='week';render()">Week</button>
+    <button class="chip ${CAL_VIEW==='list'?'sel':''}" onclick="CAL_VIEW='list';render()">List</button>
+  </div>`;
+  if(CAL_VIEW==='list') return html + renderCalList();
+  if(CAL_VIEW==='week') return html + renderCalWeek();
+  return html + renderCalMonth();
+}
+function tasksOnDate(d){ return STATE.tasks.filter(t=>t.date===d); }
+function renderCalMonth(){
+  const y=CAL_DATE.getFullYear(), m=CAL_DATE.getMonth();
+  const monthLabel = CAL_DATE.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  const first = new Date(y,m,1);
+  const startOffset = first.getDay();
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const daysInPrev = new Date(y,m,0).getDate();
+  let html = `<div class="cal-head">
+    <button onclick="CAL_DATE=new Date(${y},${m-1},1);render()">‹</button>
+    <div style="font-weight:700;">${monthLabel}</div>
+    <button onclick="CAL_DATE=new Date(${y},${m+1},1);render()">›</button>
+  </div>`;
+  html += `<div class="cal-grid">`;
+  ['S','M','T','W','T','F','S'].forEach(d=>html+=`<div class="cal-dow">${d}</div>`);
+  const cells=[];
+  for(let i=startOffset-1;i>=0;i--) cells.push({day:daysInPrev-i,other:true,date:null});
+  for(let d=1;d<=daysInMonth;d++){
+    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cells.push({day:d,other:false,date:ds});
+  }
+  while(cells.length%7!==0) cells.push({day:'',other:true,date:null});
+  cells.forEach(c=>{
+    if(c.other){ html+=`<div class="cal-day other">${c.day}</div>`; return; }
+    const tasks = tasksOnDate(c.date);
+    const isToday = c.date===todayStr();
+    const isSel = c.date===CAL_SELECTED;
+    const dots = tasks.slice(0,4).map(t=>`<span style="background:${CATS[t.category].color}"></span>`).join('');
+    html += `<div class="cal-day ${isToday?'today':''} ${isSel?'sel':''}" onclick="CAL_SELECTED='${c.date}';render()">
+      ${c.day}${dots?`<div class="cal-dots">${dots}</div>`:''}
+    </div>`;
+  });
+  html += `</div>`;
+  html += renderDayAgenda(CAL_SELECTED);
+  return html;
+}
+function renderCalWeek(){
+  const base = new Date(CAL_SELECTED);
+  const start = new Date(base); start.setDate(base.getDate()-base.getDay());
+  let html = `<div class="cal-head">
+    <button onclick="const d=new Date(CAL_SELECTED);d.setDate(d.getDate()-7);CAL_SELECTED=d.toISOString().slice(0,10);render()">‹</button>
+    <div style="font-weight:700;">Week of ${start.toLocaleDateString(undefined,{month:'short',day:'numeric'})}</div>
+    <button onclick="const d=new Date(CAL_SELECTED);d.setDate(d.getDate()+7);CAL_SELECTED=d.toISOString().slice(0,10);render()">›</button>
+  </div><div class="cal-grid">`;
+  ['S','M','T','W','T','F','S'].forEach(d=>html+=`<div class="cal-dow">${d}</div>`);
+  for(let i=0;i<7;i++){
+    const d=new Date(start); d.setDate(start.getDate()+i);
+    const ds=d.toISOString().slice(0,10);
+    const tasks=tasksOnDate(ds);
+    const dots = tasks.slice(0,4).map(t=>`<span style="background:${CATS[t.category].color}"></span>`).join('');
+    html += `<div class="cal-day ${ds===todayStr()?'today':''} ${ds===CAL_SELECTED?'sel':''}" onclick="CAL_SELECTED='${ds}';render()">${d.getDate()}${dots?`<div class="cal-dots">${dots}</div>`:''}</div>`;
+  }
+  html += `</div>` + renderDayAgenda(CAL_SELECTED);
+  return html;
+}
+function renderDayAgenda(ds){
+  const tasks = tasksOnDate(ds).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  let html = `<div class="section-title">${ds===todayStr()?'Today':new Date(ds).toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}</div>`;
+  if(!tasks.length) html += `<div class="empty">Nothing scheduled. Tap + to add a task for this day 🎀</div>`;
+  tasks.forEach(t=>html+=taskCardHtml(t));
+  return html;
+}
+function renderCalList(){
+  const byDate={};
+  STATE.tasks.forEach(t=>{ if(t.date){ byDate[t.date]=byDate[t.date]||[]; byDate[t.date].push(t);} });
+  const dates = Object.keys(byDate).sort();
+  let html='';
+  if(!dates.length) html+=`<div class="empty">No scheduled tasks yet.</div>`;
+  dates.forEach(d=>{
+    html+=`<div class="section-title">${d===todayStr()?'Today • ':''}${d}</div>`;
+    byDate[d].forEach(t=>html+=taskCardHtml(t));
+  });
+  return html;
+}
+
+function renderRewards(){
+  let html = `<div class="topbar"><h1 class="greet">💜 My Rewards</h1></div>`;
+  const hearts=STATE.collection.filter(c=>c.cat==='hearts').length;
+  const stars=STATE.collection.filter(c=>c.cat==='stars').length;
+  const gems=STATE.collection.filter(c=>c.cat==='special').length;
+  html += `<div class="card">
+    <div><strong>XP:</strong> ${STATE.xp} / ${xpForNextLevel(STATE.level)}</div>
+    <div class="xp-bar-bg" style="margin:8px 0;"><div class="xp-bar-fill" style="width:${Math.min(100,STATE.xp/xpForNextLevel(STATE.level)*100)}%"></div></div>
+    <div>LEVEL ${STATE.level} 🎀</div>
+    <div style="margin-top:10px;">💜 Hearts: ${hearts} &nbsp; ⭐ Stars: ${stars} &nbsp; 💎 Special: ${gems}</div>
+    <div style="margin-top:6px;">Collection: ${STATE.collection.length} / 100</div>
+  </div>`;
+  html += `<div class="card"><div style="font-weight:700;">🔥 ${STATE.streak.current} DAY STREAK</div>
+    <div class="sub">${STATE.streak.current>0? "YOU'VE BEEN SHOWING UP FOR YOURSELF 💗" : "No worries. Your progress still counts. Ready when you are? 🌸"}</div>
+    <div class="sub" style="margin-top:4px;">Longest streak: ${STATE.streak.longest} days</div></div>`;
+  html += `<div class="section-title">💜 MY ARMY COLLECTION</div><div class="grid3" style="padding:0 20px;">`;
+  const slots = 24;
+  for(let i=0;i<slots;i++){
+    const item = STATE.collection[i];
+    if(item) html+=`<div class="collectible">${badgeSVG(item,false)}<span class="rarity-label">${item.name}</span></div>`;
+    else html+=`<div class="collectible locked">${badgeSVG({rarity:'common',emoji:'❔'},true)}<span class="rarity-label">Locked</span></div>`;
+  }
+  html+=`</div>`;
+  html += `<div class="section-title">🎭 Character Cards</div><div class="grid3" style="padding:0 20px 20px;">`;
+  CHARACTERS.forEach(c=>{
+    const unlocked = STATE.characters.some(x=>x.id===c.id);
+    const badge = badgeSVG({rarity:'epic',emoji:c.emoji}, !unlocked);
+    if(unlocked){
+      const nick = STATE.characterNicknames[c.id] || '';
+      html += `<div class="char-card">${badge}<div style="font-weight:700;font-size:.82rem;margin-top:4px;">${c.name}</div><div class="char-role">${c.role}</div>
+        <input class="char-nick" placeholder="add a nickname..." value="${escapeHtml(nick)}" oninput="setNickname('${c.id}',this.value)"></div>`;
+    } else {
+      html += `<div class="char-card char-locked">${badge}<div style="font-weight:700;font-size:.82rem;margin-top:4px;">???</div><div class="char-role">Locked</div></div>`;
+    }
+  });
+  html+=`</div>`;
+  return html;
+}
+
+function renderProgress(){
+  const dates = Object.keys(STATE.history).sort().slice(-7);
+  const totalCompleted = STATE.tasks.filter(t=>t.completed).length;
+  const totalCreated = STATE.tasks.length;
+  const overdue = STATE.tasks.filter(t=>!t.completed && t.date && t.date<todayStr()).length;
+  let html = `<div class="topbar"><h1 class="greet">Progress 📊</h1></div>`;
+  html += `<div class="card">
+    <div>Tasks created: <strong>${totalCreated}</strong></div>
+    <div>Tasks completed: <strong>${totalCompleted}</strong></div>
+    <div>Completion rate: <strong>${totalCreated? Math.round(totalCompleted/totalCreated*100):0}%</strong></div>
+    <div>Overdue: <strong>${overdue}</strong></div>
+    <div>Current streak: <strong>${STATE.streak.current}</strong> • Longest: <strong>${STATE.streak.longest}</strong></div>
+  </div>`;
+  html += `<div class="section-title">Last 7 days</div><div class="card">`;
+  if(!dates.length) html+=`<div class="sub">No history yet — complete a task to start tracking 🌸</div>`;
+  dates.forEach(d=>{ const h=STATE.history[d]; html+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--pink-1);"><span>${d}</span><span>${h.completed} done • +${h.xp} XP</span></div>`; });
+  html+=`</div>`;
+  html += `<div class="section-title">By category</div><div class="card">`;
+  Object.keys(CATS).forEach(k=>{
+    const n = STATE.tasks.filter(t=>t.category===k && t.completed).length;
+    html+=`<div style="display:flex;justify-content:space-between;padding:4px 0;">${CATS[k].icon} ${CATS[k].label}<span>${'⭐'.repeat(Math.min(5,n))||'—'}</span></div>`;
+  });
+  html+=`</div>`;
+  return html;
+}
+
+function renderFocus(){
+  let html = `<div class="topbar"><h1 class="greet">🎀 Focus Mode</h1></div>`;
+  const active = STATE.tasks.filter(t=>!t.completed);
+  if(!FOCUS_TASK){
+    html += `<div class="section-title">Pick a task to focus on</div>`;
+    if(!active.length) html += `<div class="empty">No active tasks. Add one first!</div>`;
+    active.forEach(t=>html+=`<div class="taskcard" onclick="startFocus('${t.id}')"><div>${CATS[t.category].icon} ${escapeHtml(t.name)}</div></div>`);
+  } else {
+    const t = STATE.tasks.find(x=>x.id===FOCUS_TASK);
+    html += `<div class="card" style="text-align:center;">
+      <div style="font-weight:700;font-size:1.1rem;">${t? escapeHtml(t.name):''}</div>
+      <div id="focusTimer" style="font-size:3rem;font-weight:700;margin:20px 0;">${fmtTime(FOCUS_REMAIN)}</div>
+      <button class="btn-primary" onclick="toggleFocus()">${FOCUS_RUNNING?'Pause':'Start'}</button>
+      <button class="btn-ghost" style="margin-top:10px;" onclick="stopFocus()">End focus</button>
+    </div>`;
+  }
+  return html;
+}
+let FOCUS_TASK=null, FOCUS_REMAIN=25*60, FOCUS_RUNNING=false, FOCUS_INT=null;
+function fmtTime(s){ const m=Math.floor(s/60), sec=s%60; return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); }
+function startFocus(id){ const t=STATE.tasks.find(x=>x.id===id); FOCUS_TASK=id; FOCUS_REMAIN=(t.durationMin||25)*60; FOCUS_RUNNING=false; render(); }
+function toggleFocus(){
+  FOCUS_RUNNING=!FOCUS_RUNNING;
+  if(FOCUS_RUNNING){
+    FOCUS_INT=setInterval(()=>{
+      FOCUS_REMAIN--;
+      const el=document.getElementById('focusTimer'); if(el) el.textContent=fmtTime(FOCUS_REMAIN);
+      if(FOCUS_REMAIN<=0){ clearInterval(FOCUS_INT); FOCUS_RUNNING=false; showToast('YOU FINISHED! 💗'); completeTask(FOCUS_TASK); stopFocus(); }
+    },1000);
+  } else clearInterval(FOCUS_INT);
+  render();
+}
+function stopFocus(){ clearInterval(FOCUS_INT); FOCUS_TASK=null; FOCUS_RUNNING=false; render(); }
+
+function renderSettings(){
+  let html = `<div class="topbar"><h1 class="greet">Settings ⚙️</h1></div><div class="card">`;
+  html += settingsRow('Notifications','notifications');
+  html += settingsRow('Sound','sound');
+  html += settingsRow('Reduce animations','reduceMotion');
+  html += `</div><div class="card">
+    <label style="font-size:.8rem;font-weight:700;color:var(--ink-soft);">DAILY GOAL (tasks/day)</label>
+    <input type="number" min="1" value="${STATE.dailyGoal}" oninput="STATE.dailyGoal=+this.value;save();" style="width:100%;margin-top:6px;padding:10px;border-radius:12px;border:1.5px solid var(--pink-2);">
+  </div>
+  <div class="card">
+    <label style="font-size:.8rem;font-weight:700;color:var(--ink-soft);">THEME</label>
+    <div class="chiprow" style="margin-top:8px;">
+      ${['pink','lavender','pastel','night'].map(th=>`<button class="chip ${STATE.settings.theme===th?'sel':''}" onclick="setTheme('${th}')">${th}</button>`).join('')}
+    </div>
+  </div>
+  <div class="card">
+    <button class="btn-ghost" onclick="exportData()">⬇ Export my data</button><br>
+    <button class="btn-ghost" style="color:#c0355f;margin-top:10px;" onclick="if(confirm('Reset ALL data?')){STATE=JSON.parse(JSON.stringify(DEFAULT_STATE));save();render();}">Reset all data</button>
+  </div>`;
+  return html;
+}
+function settingsRow(label,key){
+  return `<div class="settingsrow"><span>${label}</span><button class="switch ${STATE.settings[key]?'on':''}" onclick="toggleSetting('${key}')"></button></div>`;
+}
+function toggleSetting(key){
+  STATE.settings[key]=!STATE.settings[key];
+  if(key==='notifications' && STATE.settings[key]) askNotifPermission();
+  applyTheme(); save(); render();
+}
+function setNickname(id,val){ STATE.characterNicknames[id]=val; save(); }
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', STATE.settings.theme==='pink'?'':STATE.settings.theme);
+  document.body.classList.toggle('reduce-motion', !!STATE.settings.reduceMotion);
+}
+function exportData(){
+  const blob = new Blob([JSON.stringify(STATE,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='pinky-data.json'; a.click();
+}
+
+/* ---------- Add / edit task modal ---------- */
+let DRAFT=null;
+function openAddTask(){ DRAFT={id:uid(),name:'',category:'personal',date:todayStr(),time:'',reminderMin:'',priority:'medium',difficulty:'medium',durationMin:'',notes:'',tags:''}; renderModal(); }
+function openTask(id){ const t=STATE.tasks.find(x=>x.id===id); DRAFT={...t}; renderModal(true); }
+function closeModal(){ document.getElementById('modalRoot').innerHTML=''; DRAFT=null; }
+function renderModal(editing){
+  const root=document.getElementById('modalRoot');
+  root.innerHTML = `<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">
+    <h2 style="margin:0;">${editing? 'Edit Task':'＋ Add Task 🎀'}</h2>
+    <div class="field"><label>TASK NAME</label><input id="f_name" value="${escapeHtml(DRAFT.name)}" placeholder="What do you need to do?"></div>
+    <div class="field"><label>CATEGORY</label><div class="chiprow">${Object.keys(CATS).map(k=>`<button class="chip ${DRAFT.category===k?'sel':''}" onclick="DRAFT.category='${k}';renderModal(${!!editing})">${CATS[k].icon} ${CATS[k].label}</button>`).join('')}</div></div>
+    <div class="field"><label>DATE</label><input type="date" id="f_date" value="${DRAFT.date||''}"></div>
+    <div class="field"><label>TIME</label><input type="time" id="f_time" value="${DRAFT.time||''}"></div>
+    <div class="field"><label>REMINDER</label><select id="f_rem">
+      <option value="">No reminder</option>
+      <option value="5" ${DRAFT.reminderMin=='5'?'selected':''}>5 minutes before</option>
+      <option value="15" ${DRAFT.reminderMin=='15'?'selected':''}>15 minutes before</option>
+      <option value="30" ${DRAFT.reminderMin=='30'?'selected':''}>30 minutes before</option>
+      <option value="60" ${DRAFT.reminderMin=='60'?'selected':''}>1 hour before</option>
+    </select></div>
+    <div class="field"><label>PRIORITY</label><div class="chiprow">
+      ${['high','medium','low'].map(p=>`<button class="chip ${DRAFT.priority===p?'sel':''}" onclick="DRAFT.priority='${p}';renderModal(${!!editing})">${p==='high'?'🔴':p==='medium'?'🟡':'🟢'} ${p}</button>`).join('')}
+    </div></div>
+    <div class="field"><label>DIFFICULTY (XP)</label><div class="chiprow">
+      ${['easy','medium','hard'].map(p=>`<button class="chip ${DRAFT.difficulty===p?'sel':''}" onclick="DRAFT.difficulty='${p}';renderModal(${!!editing})">${p} (+${p==='easy'?5:p==='medium'?10:20})</button>`).join('')}
+    </div></div>
+    <div class="field"><label>ESTIMATED DURATION (min)</label><input type="number" id="f_dur" value="${DRAFT.durationMin||''}"></div>
+    <div class="field"><label>NOTES</label><textarea id="f_notes" rows="2">${escapeHtml(DRAFT.notes||'')}</textarea></div>
+    <div class="field"><label>TAGS</label><input id="f_tags" value="${escapeHtml(DRAFT.tags||'')}" placeholder="comma, separated"></div>
+    <button class="btn-primary" onclick="saveTask(${!!editing})">Save Task</button>
+    ${editing? `<button class="btn-ghost" style="width:100%;margin-top:10px;color:#c0355f;" onclick="deleteTask('${DRAFT.id}')">Delete task</button>`:''}
+    <button class="btn-ghost" style="width:100%;margin-top:6px;" onclick="closeModal()">Cancel</button>
+  </div></div>`;
+}
+function saveTask(editing){
+  DRAFT.name = document.getElementById('f_name').value.trim();
+  if(!DRAFT.name){ showToast('Give your task a name 💗'); return; }
+  DRAFT.date = document.getElementById('f_date').value;
+  DRAFT.time = document.getElementById('f_time').value;
+  DRAFT.durationMin = +document.getElementById('f_dur').value || null;
+  DRAFT.notes = document.getElementById('f_notes').value;
+  DRAFT.tags = document.getElementById('f_tags').value;
+  const remMin = document.getElementById('f_rem').value;
+  if(remMin && DRAFT.date && DRAFT.time){
+    const dt = new Date(DRAFT.date+'T'+DRAFT.time);
+    dt.setMinutes(dt.getMinutes()-(+remMin));
+    DRAFT.reminderAt = dt.toISOString();
+    DRAFT._notified=false;
+  } else DRAFT.reminderAt=null;
+  if(editing){
+    const idx=STATE.tasks.findIndex(t=>t.id===DRAFT.id);
+    STATE.tasks[idx]={...STATE.tasks[idx],...DRAFT};
+  } else {
+    DRAFT.completed=false;
+    STATE.tasks.push(DRAFT);
+    const d=todayStr(); STATE.history[d]=STATE.history[d]||{completed:0,created:0,xp:0}; STATE.history[d].created++;
+  }
+  if(STATE.settings.notifications) askNotifPermission();
+  save(); closeModal(); render();
+}
+function deleteTask(id){ STATE.tasks = STATE.tasks.filter(t=>t.id!==id); save(); closeModal(); render(); }
+
+/* ---------- Layout / nav ---------- */
+const NAV=[{k:'home',icon:'🏠',label:'Home'},{k:'tasks',icon:'📋',label:'Tasks'},{k:'calendar',icon:'📅',label:'Calendar'},{k:'focus',icon:'🎯',label:'Focus'},{k:'rewards',icon:'🎁',label:'Rewards'},{k:'progress',icon:'📊',label:'Progress'},{k:'settings',icon:'⚙️',label:'Settings'}];
+function render(){
+  applyTheme();
+  const body = {home:renderHome, tasks:renderTasks, calendar:renderCalendar, rewards:renderRewards, progress:renderProgress, focus:renderFocus, settings:renderSettings}[VIEW]();
+  const nav = `<div class="navbar">${NAV.map(n=>`<button class="navbtn ${VIEW===n.k?'active':''}" onclick="VIEW='${n.k}';render()">${n.icon}<span>${n.label}</span></button>`).join('')}</div>`;
+  const fab = VIEW!=='focus' && VIEW!=='settings' ? `<button class="fab" onclick="openAddTask()">＋</button>`:'';
+  document.getElementById('app').innerHTML = body + fab + nav;
+}
+window.onload = ()=>{ applyTheme(); render(); if(STATE.settings.notifications) askNotifPermission(); };
+</script>
+</body>
+</html>
